@@ -79,6 +79,7 @@ struct imp_dbh_st {
 typedef struct dbd_maxdb_bind_param {
     SV* value;               /*!< parameter value */
     int sqltype;             /*!< parameter type provide via bind method */
+    SQLDBC_HostType hostType;   /*!< column datatyp */
     SQLDBC_Length indicator; /*!< indicator value */
 } dbd_maxdb_bind_param;
 
@@ -109,6 +110,7 @@ struct imp_sth_st {
   SQLDBC_Bool               m_hasOutValues;  /*!< flag that indicates whether this statement has out paramter(s) or not*/
       
   SQLDBC_UInt4              m_rowSetSize;    /*!< Size of the rowset, 0 means undef*/  
+  SQLDBC_Bool               m_rowSetSizeChanged;  /*!< flag that indicates that the rowsetsize has been changed*/
   SQLDBC_Int2               m_fetchSize;     /*!< fetch size, 0 means undef*/ 
 };
 

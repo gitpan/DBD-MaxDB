@@ -1,0 +1,162 @@
+List of delivered patch infos and features
+Version: 		75.00.19
+
+==================================================
+Component: Perl DBD
+==================================================
+**************************************************
+Features:
+**************************************************
+--------------------------------------------------
+
+Message Id:		1129862
+Message Type:	Change Request
+Version:		75.00.15
+Priority:		2
+Responsible:	Marco Paskamp
+
+
+Feature description:
+  $dbh->do() with a SELECT command is now allowed.
+
+
+
+--------------------------------------------------
+
+Message Id:		1129886
+Message Type:	Change Request
+Version:		75.00.16
+Priority:		2
+Responsible:	Marco Paskamp
+
+
+Feature description:
+For performance enhancement the driver caches the rowset size and avoids internal calls to the underlaying interface SQLDBC.
+
+--------------------------------------------------
+
+Message Id:		1130094
+Message Type:	Change Request
+Version:		75.00.16
+Priority:		2
+Responsible:	Thomas Simenec
+
+
+Feature description:
+Workaround in Perl DBD for kernel misbehaviour concerning correlated subqueries.
+
+**************************************************
+Patch Infos:
+**************************************************
+--------------------------------------------------
+
+Message Id:		1129696
+Message Type:	Error
+Version:		75.00.15
+Priority:		2
+Responsible:	Marco Paskamp
+
+
+appearance:
+Fixes a compile error that occurs if you are using an older version  (version < 1.31) of the perl DBI module .
+
+dbdimp.c(2083) : error C2223: left of '->debug' must point to struct/union
+dbdimp.c(2083) : warning C4047: 'function' : 'PerlIO * ' differs in levels of in
+direction from 'int'
+
+Preconditions and circumstances:
+An old version of DBI (<1.31) is used
+
+Workaround:
+using a newer version (>= 1.31) of DBI 
+
+Solution:
+update of the DBI::MaxDB module
+
+--------------------------------------------------
+
+Message Id:		1130240
+Message Type:	Error
+Version:		75.00.16
+Priority:		2
+Responsible:	Marco Paskamp
+
+
+Appearance:
+Fetch of boolean columns doesn't work. An error -10404 Conversion not supported for parameter/column (2) occurs.
+
+Preconditions and circumstances:
+Fetch of boolean columns doesn't work. An error -10404 Conversion not supported for parameter/column (2) occurs.
+
+Workaround:
+Modify your SQL statement that an other datatype than a boolean type will be returned (e.g. use decode)
+
+--------------------------------------------------
+
+Message Id:		1130277
+Message Type:	Error
+Version:		75.00.16
+Priority:		2
+Responsible:	Marco Paskamp
+
+
+Appearance:
+You get an error "-11001 "Initialization failed [Cannot get resultset metadata]" if you use a newer SQLDBC driver and prepared a non-Select statement.
+
+Preconditions and circumstances:
+You get an error "-11001 "Initialization failed [Cannot get resultset metadata]" if you use a newer SQLDBC driver and prepared a non-Select statement.
+
+Workaround:
+update of the DBI::MaxDB module
+
+--------------------------------------------------
+
+Message Id:		1130632
+Message Type:	Error
+Version:		75.00.18
+Priority:		2
+Responsible:	Marco Paskamp
+
+
+Appearance:
+The driver may crash if a statement handle will be destroyed while the corresponding connect handel has already been destroyed.
+
+Preconditions and circumstances:
+
+
+Workaround:
+update of the DBI::MaxDB module
+
+--------------------------------------------------
+
+Message Id:		1130735
+Message Type:	Error
+Version:		75.00.18
+Priority:		2
+Responsible:	Marco Paskamp
+
+
+Appearance:
+The driver might crash if you bind an undef value as output parameter
+
+Preconditions and circumstances:
+The command has an output parameter and  you bind an undef value.
+
+Workaround:
+update of the DBI::MaxDB module
+
+--------------------------------------------------
+
+Message Id:		1131214
+Message Type:	Error
+Version:		75.00.19
+Priority:		2
+Responsible:	Marco Paskamp
+
+
+Appearance:
+On Unix some compile errors occur due to the fact that the source files are stored in dos(windows) format containing CRLF at the end of line.
+
+Workaround:
+update of the DBI::MaxDB module
+

@@ -30,12 +30,6 @@
 */
 #include "dbdimp.h"
 
-#ifndef __cplusplus
-#ifndef HAS_BOOL
-typedef char bool;
-#endif
-#endif
-
 #ifndef WIN32
 #define UNIX UNIX
 #endif

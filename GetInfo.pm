@@ -40,7 +40,7 @@ require 5.004;
 package DBD::MaxDB::GetInfo;
 
 use strict;
-use DBD::MaxDB;
+use DBD::MaxDB();
 
 # Beware: not officially documented interfaces...
 # use DBI::Const::GetInfoType qw(%GetInfoType);
@@ -195,8 +195,9 @@ sub sql_user_name {
     return $dbh->{CURRENT_USER} || $dbh->{Username};
 }
 
-
-our %info = (
+# our %info = (	# Perl 5.005_03 does not accept 'our'
+no strict;
+%info = (
      20 => 'N',                           # SQL_ACCESSIBLE_PROCEDURES
      19 => 'N',                           # SQL_ACCESSIBLE_TABLES
       0 => 8,                             # SQL_ACTIVE_CONNECTIONS

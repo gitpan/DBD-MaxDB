@@ -31,7 +31,7 @@
 
 require 5.004;
 
-$DBD::MaxDB::VERSION = '7.5.00.14';
+$DBD::MaxDB::VERSION = '7.5.00.19';
 
 {
     package DBD::MaxDB;
@@ -398,7 +398,7 @@ __END__
 =head1 NAME
 
 DBD::MaxDB - MySQL MaxDB database driver for the DBI module
-version 7.5.0    BUILD 014-000-000-000
+version 7.5.0    BUILD 019-000-000-000
 
 =head1 SYNOPSIS
 
@@ -458,9 +458,11 @@ C<< dbi:MaxDB:/<database_server>[:<port>]/<database_name>[?<options>] >>
 
   <port>               Socket port to which you want
                        to connect. Specify this port
-                       only if the X Server has been
-                       configured with a port that
-                       is not the system default port.
+                       only if the X Server (MaxDB 
+                       remote communication server) 
+                       has been configured with a port 
+                       that is not the system default 
+                       port.
 
   <database_name>      Name of the database instance
 

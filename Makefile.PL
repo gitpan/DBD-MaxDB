@@ -55,7 +55,7 @@ my %opts =
     dist	=> {
 	DIST_DEFAULT=> 'clean distcheck readmetxt tardist',
 	PREOP    => '$(MAKE) -f Makefile.old distdir',
-	COMPRESS => 'gzip -v9', SUFFIX => 'gz'
+	COMPRESS => 'gzip -f -v9', SUFFIX => 'gz'
     },
     OBJECT	=> '$(O_FILES)',
  );
@@ -85,7 +85,7 @@ my $SQLDBC_sl;
 my $SQLDBC_incl=$SQLDBC_SDK.'/sdk/sqldbc/incl';
 if ($^O ne 'MSWin32') {
   $opts{OPTIMIZE} = '-g -O0' if $opt_g;
-  if (($^O eq 'aix') || ($^O eq 'solaris')) {
+  if (($^O eq 'aix') || ($^O eq 'solaris')|| ($^O eq 'hpux')) {
     $SQLDBC_slPath=$SQLDBC_SDK.'/lib/lib64';
   } else {
     $SQLDBC_slPath=$SQLDBC_SDK.'/lib';
@@ -95,7 +95,12 @@ if ($^O ne 'MSWin32') {
   $SQLDBC_slPath=$SQLDBC_SDK.'/pgm';
   $SQLDBC_lib=$SQLDBC_SDK.'/sdk/sqldbc/lib/libSQLDBC_C'.$Config{_a};
 }
-$SQLDBC_sl=$SQLDBC_slPath.'/libSQLDBC_C.'.$Config{so};
+$SQLDBC_sl=$SQLDBC_slPath.'/libSQLDBC_C.';
+if ($^O eq 'aix'){
+  $SQLDBC_sl.= 'so';
+}else {
+  $SQLDBC_sl.= $Config{so};
+}
 
 if ($^O eq 'MSWin32') {
   $SQLDBC_lib    = Win32::GetShortPathName($SQLDBC_lib);

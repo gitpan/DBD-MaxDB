@@ -1,6 +1,6 @@
 NAME
     INSTALL - How to install and configure DBD::MaxDB version 7.5.0 BUILD
-    014-000-000-000
+    019-000-000-000
 
 SYNOPSIS
       perl Makefile.PL [options]
@@ -42,7 +42,7 @@ IF YOU HAVE PROBLEMS:
 
     Mailing list archives are available at:
 
-    http://lists.mysql.com/maxdb
+    <http://lists.mysql.com/maxdb>
 
     Additionally you might try the dbi-user mailing list for questions about
     DBI and its modules in general.
@@ -50,7 +50,7 @@ IF YOU HAVE PROBLEMS:
 HOW TO GET THE LATEST VERSION:
     Use the following URL to look for new versions of this module:
 
-    http://search.cpan.org/~maxdb
+    <http://search.cpan.org/~maxdb>
 
 PREREQUISITES
     Before installing the driver make sure that you have the following
@@ -63,7 +63,7 @@ PREREQUISITES
     DBI Build, test and install DBI (at least 1.21). Since DBD::MaxDB is a
         DBI driver, you need DBI. It is available at:
 
-        http://search.cpan.org
+        <http://search.cpan.org>
 
     C compiler
         A C compiler is required, since currently you can only install from
@@ -79,16 +79,16 @@ PREREQUISITES
         interface SQLDBC which is not included in this distribution. You
         need at least the version 7.5.00.12. For details about SQLDBC see:
 
-        http://www.mysql.com/products/maxdb/pdf/sqldbc_eng.pdf
+        <http://www.mysql.com/products/maxdb/pdf/sqldbc_eng.pdf>
 
         You can download the SQLDBC software development kit from the MySQL
         homepage at:
 
-        http://www.mysql.com/maxdb
+        <http://www.mysql.com/maxdb>
 
         or from the ftp server at:
 
-        ftp://ftp.sap.com/pub/maxdb/7.5.00
+        <ftp://ftp.sap.com/pub/maxdb/7.5.00>
 
             There are different ways to install the SQLDBC software
             development kit.
@@ -133,7 +133,7 @@ PREREQUISITES
         driver supports all available versions of MaxDB (SAP DB) at least
         7.3. The MaxDB software and documentation can be found at:
 
-        http://www.mysql.com/maxdb
+        <http://www.mysql.com/maxdb>
 
 INSTALLATION
     By default Makefile.PL uses the MaxDB global configuration file
