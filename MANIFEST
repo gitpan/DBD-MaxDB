@@ -70,4 +70,3 @@ t/mysql_50chopblanks.t
 t/mysql_50commit.t
 t/mysql_akdbd.t
 t/mysql_dbdadmin.t
-META.yml                                 Module meta-data (added by MakeMaker)

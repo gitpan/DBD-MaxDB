@@ -398,7 +398,7 @@ __END__
 =head1 NAME
 
 DBD::MaxDB - MySQL MaxDB database driver for the DBI module
-version 7.5.0    BUILD 024-003-087-646
+version 7.5.0    BUILD 024-000-000-000
 
 =head1 SYNOPSIS
 
