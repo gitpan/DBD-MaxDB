@@ -139,6 +139,17 @@ require 5.004;
         my $result = execSQL($dbh, qq{DROP TABLE $tablename});
         return $result;
     }
+    # @param [in] data base handle
+    # @param [in] table name
+    # @return 1 on success
+    #         0 on error
+    sub dropDBProc($;$) {
+        my $dbh = shift;
+        my $tablename = shift;
+
+        my $result = execSQL($dbh, qq{DROP DBPROCEDURE $tablename});
+        return $result;
+    }
     
     1;
 }

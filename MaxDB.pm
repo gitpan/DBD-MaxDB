@@ -31,7 +31,7 @@
 
 require 5.004;
 
-$DBD::MaxDB::VERSION = '7.5.00.19';
+$DBD::MaxDB::VERSION = '7.5.00.24';
 
 {
     package DBD::MaxDB;
@@ -398,7 +398,7 @@ __END__
 =head1 NAME
 
 DBD::MaxDB - MySQL MaxDB database driver for the DBI module
-version 7.5.0    BUILD 019-000-000-000
+version 7.5.0    BUILD 024-003-087-646
 
 =head1 SYNOPSIS
 
@@ -765,7 +765,7 @@ DBI and its modules in general.
 
 =head1 COPYRIGHT
 
-Copyright 2000-2004 by SAP AG
+Copyright 2000-2005 by SAP AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of either the Artistic License, as

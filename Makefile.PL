@@ -53,8 +53,8 @@ my %opts =
     VERSION_FROM => 'MaxDB.pm',
     clean	=> { FILES=> 'MaxDB.xsi dbdmaxdb.h' },
     dist	=> {
-	DIST_DEFAULT=> 'clean distcheck readmetxt tardist',
-	PREOP    => '$(MAKE) -f Makefile.old distdir',
+	DIST_DEFAULT=> 'distcheck readmetxt tardist',
+#	PREOP    => '$(MAKE) -f Makefile.old distdir',
 	COMPRESS => 'gzip -f -v9', SUFFIX => 'gz'
     },
     OBJECT	=> '$(O_FILES)',
@@ -68,21 +68,32 @@ if ($ExtUtils::MakeMaker::VERSION >= 5.43) {
 
 my $opt_g = 0;
 my $opt_o = '';
+my $opt_i = '';
+my $opt_l = '';
 Getopt::Long::GetOptions("g!" => \$opt_g,
-                         "o=s" => \$opt_o) or die "Invalid arguments";
+                         "o=s" => \$opt_o,
+                         "i=s" => \$opt_i,
+                         "l=s" => \$opt_l) or die "Invalid arguments";
 
-    print "Overriding MaxDB Directory with command line option: $opt_o\n" if $opt_o ;
+    print "Overriding MaxDB directory with command line option        : $opt_o\n" if $opt_o ;
+    print "Overriding MaxDB include directory with command line option: $opt_i\n" if $opt_i ;
+    print "Overriding MaxDB lib directory with command line option    : $opt_l\n" if $opt_l ;
 
 print "\nConfiguring DBD::MaxDB ...\n";
 
-my $SQLDBC_SDK= $opt_o || $ENV{SQLDBCSDK} || $ENV{INSTROOT} || getSQLDBCSDKFromIndepPath();
+my $SQLDBC_SDK= $opt_o || $ENV{SQLDBCSDK} || $ENV{INSTROOT} || getSQLDBCSDKFromIndepPath()|| "";
 
-unless ($SQLDBC_SDK && -d $SQLDBC_SDK) {die "SQLDBCSDK environment variable ($SQLDBC_SDK) does not refer to a directory.\n";}
+unless (($SQLDBC_SDK && -d $SQLDBC_SDK) || ($opt_i ne '' && $opt_l ne ''))
+{die "SQLDBCSDK environment variable ($SQLDBC_SDK) does not refer to a directory.\n";}
+my $SQLDBC_incl=$SQLDBC_SDK.'/sdk/sqldbc/incl';
+
+if ($opt_i ne '') {
+    $SQLDBC_incl=$opt_i;
+}
 
 my $SQLDBC_lib;
 my $SQLDBC_slPath;
 my $SQLDBC_sl;
-my $SQLDBC_incl=$SQLDBC_SDK.'/sdk/sqldbc/incl';
 if ($^O ne 'MSWin32') {
   $opts{OPTIMIZE} = '-g -O0' if $opt_g;
   if (($^O eq 'aix') || ($^O eq 'solaris')|| ($^O eq 'hpux')) {
@@ -101,6 +112,12 @@ if ($^O eq 'aix'){
 }else {
   $SQLDBC_sl.= $Config{so};
 }
+
+if ($opt_l ne '' ) {
+    $SQLDBC_slPath=$opt_l;
+}
+
+$SQLDBC_sl=$SQLDBC_slPath.'/libSQLDBC_C.'.$Config{so};
 
 if ($^O eq 'MSWin32') {
   $SQLDBC_lib    = Win32::GetShortPathName($SQLDBC_lib);
@@ -203,8 +220,11 @@ sub checkSQLDBCSDK {
     print "MaxDB SQLDBC sdk! If it isn't already installed you can download\n";
     print "it from the MySQL homepage.\n\n";
     print "You need also to set the path to the SQLDBC sdk directory.\n";
-    print "You can do this ether by setting the SQLDBCSDK environment variable\n";
-    print "or by runing 'perl Makefile.PL -o <sqldbc-sdk-dir>'.\n\n";
+    print "You can do this either by setting the SQLDBCSDK environment variable\n";
+    print "or by running 'perl Makefile.PL -o <sqldbc-sdk-dir>'.\n";
+    print "Alternatively you can specify the path to the include and library\n";
+    print "files separately using the -i <include-path> and -l <lib-path>\n";
+    print "command line switches.\n\n";
     die "Makefile.PL aborted.\n";
   }
 }

@@ -1084,9 +1084,20 @@ static int dbd_maxdb_sqldbc_bind_parameters (SV* sth, imp_sth_t* imp_sth){
       *indicator = SQLDBC_NULL_DATA;
       value = NULL;
     } else {
-      *indicator = SQLDBC_NTS;
-      value = SvPV(svVal, valLen);
-      valLen = SvLEN (svVal);
+    	  switch (m_bindParms->hostType) {
+   	      case SQLDBC_HOSTTYPE_INT1       : {
+			      *indicator = 1;
+			      value = SvPV(svVal, valLen);
+            *value -= 48;
+			      valLen = 1;
+            break;
+          } default : {
+			      *indicator = SQLDBC_NTS;
+			      value = SvPV(svVal, valLen);
+			      valLen = SvLEN (svVal);
+			      break;    
+          } 
+       }
     }
     if (SQLDBC_PreparedStatement_bindParameter (imp_sth->m_prepstmt,
                                                 index+1,
@@ -1252,7 +1263,8 @@ static int dbd_maxdb_registerResultSet(SV* sth, imp_sth_t* imp_sth){
         break;
         }
         case SQLDBC_SQLTYPE_CHA           :               
-        case SQLDBC_SQLTYPE_CHE           :{
+        case SQLDBC_SQLTYPE_CHE           :
+        case SQLDBC_SQLTYPE_UNICODE       :{
         m_col->chopBlanks = SQLDBC_TRUE;
         break; 
         }
@@ -1264,7 +1276,6 @@ static int dbd_maxdb_registerResultSet(SV* sth, imp_sth_t* imp_sth){
         case SQLDBC_SQLTYPE_TIMESTAMP     : {
         break;
         }
-        case SQLDBC_SQLTYPE_UNICODE       :
         case SQLDBC_SQLTYPE_VARCHARUNI    : {
         break;
         }
@@ -2144,17 +2155,27 @@ int dbd_maxdb_bind_ph (SV *sth, imp_sth_t *imp_sth, SV *param, SV *value,
      dbd_maxdb_internal_error(sth, DBD_ERR_INVALID_PARAMETER_INDEX_D, index);
      DBD_MAXDB_METHOD_RETURN(imp_sth, dbd_maxdb_bind_ph, SQLDBC_FALSE); 
    }
+
    parameter = &imp_sth->m_bindParms[index-1];
+   parameter->hostType = SQLDBC_HOSTTYPE_ASCII;
+   if (sql_type) parameter->sqltype = sql_type;
 
    if (parameter->value) (void) SvREFCNT_dec(parameter->value);
    if (is_inout) {
      parameter->value = SvREFCNT_inc(value);
    } else {
-     parameter->value = newSVsv(value);
+     	 switch (SQLDBC_ParameterMetaData_getParameterType (imp_sth->m_paramMetadata, index)) {
+   	      case SQLDBC_SQLTYPE_BOOLEAN       : {
+   	      	IV intval= SvIV(value)?1:0;
+            parameter->hostType = SQLDBC_HOSTTYPE_INT1;
+            parameter->value = newSViv(intval);
+            break;
+          } default : {
+            parameter->value = newSVsv(value);
+          } 
+       }
    }
    
-   parameter->hostType = SQLDBC_HOSTTYPE_ASCII;
-   if (sql_type) parameter->sqltype = sql_type;
    
    pMode = SQLDBC_ParameterMetaData_getParameterMode  (imp_sth->m_paramMetadata, index);  
    if (pMode == parameterModeInOut || pMode == parameterModeOut){
