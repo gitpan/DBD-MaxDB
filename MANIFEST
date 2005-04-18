@@ -54,6 +54,9 @@ t/135ChopBlanks.t
 t/136AutoCommit.t
 t/137stmtstdproperties2.t
 t/138severalstmts.t
+t/139fetchAllTypes.t
+t/142UndefParameter.t
+t/143BooleanTypeHandling.t
 t/lib.pl
 t/MaxDB.dbtest
 t/MaxDB.mtest

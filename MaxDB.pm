@@ -6,12 +6,11 @@
 #
 #\if EMIT_LICENCE
 #
-#    ========== licence begin  PERL_STANDARD
-#    Copyright (c) 2001-2004 SAP AG
+#    ========== licence begin  GPL
+#    Copyright (c) 2001-2005 SAP AG
 #
 #    This program is free software; you can redistribute it and/or
-#    modify it under the terms of either the Artistic License, as
-#    specified in the Perl README file or the GNU General Public License
+#    modify it under the terms of the GNU General Public License
 #    as published by the Free Software Foundation; either version 2
 #    of the License, or (at your option) any later version.
 #
@@ -24,14 +23,13 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #    ========== licence end
-#
-#
+
 #\endif
 #*/
 
 require 5.004;
 
-$DBD::MaxDB::VERSION = '7.5.00.24';
+$DBD::MaxDB::VERSION = '7.5.00.26';
 
 {
     package DBD::MaxDB;
@@ -398,7 +396,7 @@ __END__
 =head1 NAME
 
 DBD::MaxDB - MySQL MaxDB database driver for the DBI module
-version 7.5.0    BUILD 024-000-000-000
+version 7.5.0    BUILD 026-121-094-430
 
 =head1 SYNOPSIS
 
@@ -407,7 +405,7 @@ version 7.5.0    BUILD 024-000-000-000
            or die "Can't connect $DBI::err $DBI::errstr\n";
   $sth = $dbh->prepare("SELECT 'Hello World' as WELCOME from dual")
            or die "Can't prepare statement $DBI::err $DBI::errstr\n";
-  $sth = $dbh->execute()
+  $res = $sth->execute()
            or die "Can't execute statement $DBI::err $DBI::errstr\n";
   @row = $sth->fetchrow_array();
   ...

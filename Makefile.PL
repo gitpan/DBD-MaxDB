@@ -7,26 +7,24 @@
 #
 #\if EMIT_LICENCE
 #
-#    ========== licence begin  PERL_STANDARD
-#    Copyright (c) 2001-2004 SAP AG
+#    ========== licence begin  GPL
+#    Copyright (c) 2001-2005 SAP AG
 #
 #    This program is free software; you can redistribute it and/or
-#    modify it under the terms of either the Artistic License, as
-#    specified in the Perl README file or the GNU General Public License
+#    modify it under the terms of the GNU General Public License
 #    as published by the Free Software Foundation; either version 2
 #    of the License, or (at your option) any later version.
-#    
+#
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
-#    
+#
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #    ========== licence end
-#
-#
+
 #\endif
 #*/
 BEGIN { require 5.004 }	
@@ -81,7 +79,7 @@ Getopt::Long::GetOptions("g!" => \$opt_g,
 
 print "\nConfiguring DBD::MaxDB ...\n";
 
-my $SQLDBC_SDK= $opt_o || $ENV{SQLDBCSDK} || $ENV{INSTROOT} || getSQLDBCSDKFromIndepPath()|| "";
+my $SQLDBC_SDK= $opt_o || $ENV{SQLDBCSDK} || getSQLDBCSDKFromIndepPath() || $ENV{INSTROOT} || "";
 
 unless (($SQLDBC_SDK && -d $SQLDBC_SDK) || ($opt_i ne '' && $opt_l ne ''))
 {die "SQLDBCSDK environment variable ($SQLDBC_SDK) does not refer to a directory.\n";}
@@ -96,7 +94,7 @@ my $SQLDBC_slPath;
 my $SQLDBC_sl;
 if ($^O ne 'MSWin32') {
   $opts{OPTIMIZE} = '-g -O0' if $opt_g;
-  if (($^O eq 'aix') || ($^O eq 'solaris')|| ($^O eq 'hpux')) {
+  if (($^O eq 'aix') || ($^O eq 'solaris')|| ($^O eq 'hpux' &&  !(`uname -m` =~ /ia64/))) {
     $SQLDBC_slPath=$SQLDBC_SDK.'/lib/lib64';
   } else {
     $SQLDBC_slPath=$SQLDBC_SDK.'/lib';

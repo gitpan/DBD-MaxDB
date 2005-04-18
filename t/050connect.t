@@ -46,10 +46,10 @@ print "1..$tests\n";
 MaxDBTest::Test(1);
 
 print " Test 2: connecting to the database\n";
-if (! defined $ENV{SERVERDB}) {
-  MaxDBTest::Test("skipped", "SERVERDB is undefined");
+if (! defined $ENV{SERVERDB} || ! defined $ENV{SERVERNODE}) {
+  MaxDBTest::Test("skipped", "SERVERDB/SERVERNODE is undefined");
 } else {      
-my $dbh = DBI->connect("DBI:MaxDB:$ENV{SERVERDB}","DBA","DBA") or die "Can't connect $DBI::err $DBI::errstr\n";
+my $dbh = DBI->connect("DBI:MaxDB:$ENV{SERVERNODE}/$ENV{SERVERDB}","DBA","DBA") or die "Can't connect $DBI::err $DBI::errstr\n";
 MaxDBTest::Test(1);
 }
 
