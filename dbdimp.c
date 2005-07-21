@@ -2052,6 +2052,7 @@ int dbd_maxdb_st_blob_read (SV *sth, imp_sth_t *imp_sth, int field, long offset,
   SQLDBC_Retcode rc;
   SQLDBC_RowSet *rowset = 0;
   SQLDBC_Length ind;
+  dbd_maxdb_bind_column *m_col;
 
   DBD_MAXDB_METHOD_ENTER(imp_sth, dbd_maxdb_st_blob_read); 
 
@@ -2063,10 +2064,11 @@ int dbd_maxdb_st_blob_read (SV *sth, imp_sth_t *imp_sth, int field, long offset,
     dbd_maxdb_internal_error(sth, DBD_ERR_INITIALIZATION_FAILED_S, "Cannot get rowset");
     DBD_MAXDB_METHOD_RETURN(imp_sth, dbd_maxdb_st_blob_read, SQLDBC_FALSE); 
   }
-
+  
+  m_col = &imp_sth->m_cols[field];
   if ((rc = SQLDBC_RowSet_getObjectByPos (rowset,
                                           field+1,
-                                          SQLDBC_HOSTTYPE_ASCII,
+                                          m_col->hostType,
                                           ((char *)SvPVX(bufsv)) + destoffset,
                                           &ind,
                                           len,
@@ -2175,8 +2177,19 @@ int dbd_maxdb_bind_ph (SV *sth, imp_sth_t *imp_sth, SV *param, SV *value,
             parameter->hostType = SQLDBC_HOSTTYPE_INT1;
             parameter->value = newSViv(intval);
             break;
+          }  
+          case SQLDBC_SQLTYPE_STRB          :
+          case SQLDBC_SQLTYPE_LONGB         : 
+	        case SQLDBC_SQLTYPE_CHB           :
+	        case SQLDBC_SQLTYPE_ROWID         :
+	        case SQLDBC_SQLTYPE_VARCHARB      : 
+          {	
+            parameter->hostType = SQLDBC_HOSTTYPE_BINARY;
+            parameter->value = newSVsv(value);
+            break; 
           } default : {
             parameter->value = newSVsv(value);
+            break; 
           } 
        }
    }
