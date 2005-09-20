@@ -1,6 +1,6 @@
 NAME
-    INSTALL - How to install and configure DBD::MaxDB version 7.5.0 BUILD
-    032-000-000-000
+    INSTALL - How to install and configure DBD::MaxDB version 7.6.0 BUILD
+    016-000-000-000
 
 SYNOPSIS
       perl Makefile.PL [options]
@@ -77,7 +77,8 @@ PREREQUISITES
     MaxDB SQLDBC-SDK
         The DBD::MaxDB driver needs to link with MaxDB's common database
         interface SQLDBC which is not included in this distribution. You
-        need at least the version 7.5.00.12. For details about SQLDBC see:
+        need at least the version 7.5.00.12. But you should use a newer
+        version of SQLDBC from release 7.6.00. For details about SQLDBC see:
 
         <http://www.mysql.com/products/maxdb/pdf/sqldbc_eng.pdf>
 
@@ -85,10 +86,6 @@ PREREQUISITES
         homepage at:
 
         <http://www.mysql.com/maxdb>
-
-        or from the ftp server at:
-
-        <ftp://ftp.sap.com/pub/maxdb/7.5.00>
 
             There are different ways to install the SQLDBC software
             development kit.
@@ -114,14 +111,14 @@ PREREQUISITES
 
               Platform                    Package name
               ------------------------------------------------------------------------
-              Microsoft Windows (x86)     maxdb-sqldbc-win-32bit-i386-7_5_00_12.zip
-              Microsoft Windows (IA64)    maxdb-sqldbc-win-64bit-ia64-7_5_00_12.zip
-              Linux (x86)                 maxdb-sqldbc-linux-32bit-i386-7_5_00_12.tgz
-              Linux (IA64)                maxdb-sqldbc-linux-64bit-ia64-7_5_00_12.tgz
-              IBM AIX 5 (PowerPC, 64-bit) maxdb-sqldbc-aix5-64bit-ppc-7_5_00_12.tgz
-              HP-UX (HPPA, 64-bit)        maxdb-sqldbc-hpux-64bit-hppa-7_5_00_12.tgz
-              Sun Solaris (Sparc, 64-bit) maxdb-sqldbc-sun-64bit-sparc-7_5_00_12.tgz
-              Tru64 (Alpha, 64-bit)       maxdb-sqldbc-tru64-64bit-alpha-7_5_00_12.tgz
+              Microsoft Windows (x86)     maxdb-sqldbc-win-32bit-i386-7_6_00_16.zip
+              Microsoft Windows (IA64)    maxdb-sqldbc-win-64bit-ia64-7_6_00_16.zip
+              Linux (x86)                 maxdb-sqldbc-linux-32bit-i386-7_6_00_16.zip
+              Linux (IA64)                maxdb-sqldbc-linux-64bit-ia64-7_6_00_16.zip
+              IBM AIX 5 (PowerPC, 64-bit) maxdb-sqldbc-aix5-64bit-ppc-7_6_00_16.zip
+              HP-UX (HPPA, 64-bit)        maxdb-sqldbc-hpux-64bit-hppa-7_6_00_16.zip
+              Sun Solaris (Sparc, 64-bit) maxdb-sqldbc-sun-64bit-sparc-7_6_00_16.zip
+              Tru64 (Alpha, 64-bit)       maxdb-sqldbc-tru64-64bit-alpha-7_6_00_16.zip
 
             Unpack the tarball to a local directory of your choice with the
             following command:

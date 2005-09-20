@@ -252,7 +252,8 @@ sub checkSQLDBCSDKVersion {
       }else {
         print "Cannot find the version of SQLDBC sdk.\n"; 
       }
-	    print "The version of SQLDBC-SDK must be at least 7.5.0 Build 012.\n\n";
+	    print "The version of SQLDBC-SDK must be at least 7.5.0 Build 012 but\n\n";
+	    print "you should always try the newest version available.\n\n";
 	    print "The DBD::MaxDB module needs to link with MaxDB's common database \n";
 	    print "interface SQLDBC. The DBD::MaxDB module does _not_ include the\n";
 	    print "MaxDB SQLDBC sdk! If it isn't already installed you can download\n";

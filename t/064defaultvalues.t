@@ -1,9 +1,9 @@
 #!perl -w -I./t
 #/*!
-#  @file           143BooleanTypeHandling.t
+#  @file           062indexes.t
 #  @author         MarcoP
 #  @ingroup        dbd::MaxDB
-#  @brief          test handling of booolean data type
+#  @brief          error message from open source
 #
 #\if EMIT_LICENCE
 #
@@ -31,9 +31,11 @@
 use DBI;
 use MaxDBTest;
 
+my $data = '1234abcd';
+
 # to help ActiveState's build process along by behaving (somewhat) if a dsn is not provided
 BEGIN {
-   $tests = 8;
+   $tests = 7;
    $MaxDBTest::numTest=0;
    unless (defined $ENV{DBI_DSN}) {
       print "1..0 # Skipped: DBI_DSN is undefined\n";
@@ -41,39 +43,41 @@ BEGIN {
    }
 }
 
+
 print "1..$tests\n";
 print " Test 1: connect\n";
-my $dbh = DBI->connect() or die "Can't connect $DBI::err $DBI::errstr\n";
+my $c = DBI->connect() or die "Can't connect $DBI::err $DBI::errstr\n";
 MaxDBTest::Test(1);
 
 print " Test 2: drop table\n";
-MaxDBTest::dropTable($dbh, "BooleantestTable");
+MaxDBTest::dropTable($c, "defaultvalues");
 MaxDBTest::Test(1);
 
-print " Test 3: create table (a boolean, b boolean)\n";
-$dbh->do("CREATE TABLE BooleantestTable (a boolean, b boolean)") or die "CREATE TABLE failed $DBI::err $DBI::errstr\n";
+my $testval = "abc123";
+my $testval_int = 42;
+
+print " Test 3: create table\n";
+$c->do("CREATE TABLE defaultvalues (ID INT NOT NULL DEFAULT ".$testval_int." , DTA VARCHAR(10) NOT NULL DEFAULT '".$testval."')") or die "CREATE TABLE failed $DBI::err $DBI::errstr\n";
 MaxDBTest::Test(1);
 
-print " Test 4: insert one row\n";
-my $sth = $dbh->prepare('INSERT INTO BooleantestTable (a,b) VALUES (?,?)') or die "dbh->prepare INSERT failed $DBI::err $DBI::errstr\n";
-$sth->execute(0, 1)or die "dbh->prepare INSERT failed $DBI::err $DBI::errstr\n";
+print " Test 4: insert data\n";
+my $s = $c->prepare( 'INSERT INTO defaultvalues ( ID, DTA ) VALUES ( ?, ? )' ) or die "PREPARE INSERT ... failed $DBI::err $DBI::errstr\n";
+$s->execute($DBD::MaxDB::DEFAULT_PARAMETER,$DBD::MaxDB::DEFAULT_PARAMETER) or die "EXECUTE INSERT ... failed $DBI::err $DBI::errstr\n"; 
 MaxDBTest::Test(1);
 
-print " Test 5: call selectrow_array (list context) => returned array should have at least 1 entry\n";
-my  @row = $dbh->selectrow_array("SELECT * FROM BooleantestTable") or die "selectrow_array failed $DBI::err $DBI::errstr";
-if ($#row < 1) { die "selectrow_array returned array with less than 2 entries"; }
+print " Test 5: select data\n";
+my $s2 = $c->prepare( 'SELECT * FROM defaultvalues' ) or die "PREPARE SELECT ... failed $DBI::err $DBI::errstr\n";
+$s2->execute or die "EXECUTE SELECT ... failed $DBI::err $DBI::errstr\n"; 
+my $row = $s2->fetchrow_hashref() or die "FETCH ... failed $DBI::err $DBI::errstr\n"; 
 MaxDBTest::Test(1);
 
-print " Test 6: compare the fetched data with the stuff we inserted\n";
-# row should contain (0, 1)
-MaxDBTest::Test(($row[0] == 0 && $row[1] == 1));
+print " Test 6: check data\n";
+MaxDBTest::Test( ($testval eq $row->{DTA}));
 
-print " Test 7: drop table\n";
-$dbh->do("DROP TABLE BooleantestTable") or die "DROP TABLE failed $DBI::err $DBI::errstr\n";
-MaxDBTest::Test(1);
+print " Test 7: check data\n";
+MaxDBTest::Test( ($testval_int == $row->{ID}));
 
-print " Test 8: disconnect\n";
-$dbh->disconnect or die "Can't disconnect $DBI::err $DBI::errstr\n";
-MaxDBTest::Test(1);
-
+$s->finish;
+$s2->finish;
+$c->disconnect;
 

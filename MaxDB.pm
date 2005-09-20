@@ -29,7 +29,7 @@
 
 require 5.004;
 
-$DBD::MaxDB::VERSION = '7.5.00.32';
+$DBD::MaxDB::VERSION = '7.6.00.16';
 
 {
     package DBD::MaxDB;
@@ -50,6 +50,9 @@ $DBD::MaxDB::VERSION = '7.5.00.32';
     $errstr = "";       # holds error string for DBI::errstr
     $sqlstate = "00000";
     $drh = undef;       # holds driver handle once initialised
+    
+    my $tmp = "constant default paramater, can be used for prepared statements";
+    $DEFAULT_PARAMETER =  \*{"DBD::MaxDB::". $tmp};
 
     sub driver{
         return $drh if $drh;
@@ -396,7 +399,7 @@ __END__
 =head1 NAME
 
 DBD::MaxDB - MySQL MaxDB database driver for the DBI module
-version 7.5.0    BUILD 032-000-000-000
+version 7.6.0    BUILD 016-000-000-000
 
 =head1 SYNOPSIS
 
@@ -735,6 +738,24 @@ catalogs so far the parameter C<TABLE_CAT> is ignored as a selection criterion a
 the C<TABLE_CAT> field of a fetched row is always C<NULL>.
 
 =back
+
+=head1 Special Features
+
+=head2 Binding of default values as parameter
+
+The driver supports to bind a special default parameter C<$DBD::MaxDB::DEFAULT_PARAMETER> 
+to set the default value as parameter of a prepared statement. 
+
+  use DBI;
+  $dbh->do("CREATE TABLE defaultvalues (ID INT NOT NULL DEFAULT 42)") 
+           or die "Can't create table $DBI::err $DBI::errstr\n";
+  $sth = $dbh->prepare("INSERT INTO defaultvalues (ID) values (?)")
+           or die "Can't prepare statement $DBI::err $DBI::errstr\n";
+
+  $res = $sth->execute($DBD::MaxDB::DEFAULT_PARAMETER)
+           or die "Can't execute statement $DBI::err $DBI::errstr\n";
+  ...
+
 
 =head1 INSTALLATION
 

@@ -250,6 +250,8 @@ static dbd_maxdb_errordata errordata[] =
     { DBD_ERR_PARAMETER_IS_NOT_INPUT_D,  -11012 ,  "07002","Parameter for column (%d) is not an out/inout parameter."},
 };
 
+static SV* referenceDefaultValue  = NULL;
+
 static void dbd_maxdb_delete_params(dbd_maxdb_bind_param* params, int parCnt) {
   int i;
   if (parCnt) {
@@ -490,6 +492,10 @@ int dbd_maxdb_db_login6(SV *dbh, imp_dbh_t *imp_dbh, char *url, char *user, char
   imp_dbh->m_dbmd = SQLDBC_Connection_getMetaData(imp_dbh->m_connection);      
   DBIc_ACTIVE_on(imp_dbh);
   DBIc_on(imp_dbh, DBIcf_IMPSET);
+  if (! referenceDefaultValue){
+    referenceDefaultValue = get_sv("DBD::MaxDB::DEFAULT_PARAMETER", 0);
+    referenceDefaultValue = SvRV(referenceDefaultValue);
+  }
   DBD_MAXDB_METHOD_RETURN(imp_dbh, dbd_maxdb_db_login6, SQLDBC_TRUE); 
 }
 
@@ -843,7 +849,7 @@ SV* dbd_maxdb_db_FETCH_attrib(SV* dbh, imp_dbh_t* imp_dbh, SV* keysv) {
             result = (SQLDBC_Connection_isUnicodeDatabase (imp_dbh->m_connection))?&PL_sv_yes:&PL_sv_no; 
             break;
       }
-      case dbd_maxdb_option_sdkversion:{
+      case dbd_maxdb_option_libraryversion :{
                 char* msg = SQLDBC_Environment_getLibraryVersion (imp_drh->m_maxDBEnv);
                 result = sv_2mortal(newSVpv(msg, strlen(msg)));
             break;
@@ -853,7 +859,7 @@ SV* dbd_maxdb_db_FETCH_attrib(SV* dbh, imp_dbh_t* imp_dbh, SV* keysv) {
            result = sv_2mortal(newSVpv(msg, strlen(msg)));
            break;
       }
-      case dbd_maxdb_option_libraryversion:{
+      case dbd_maxdb_option_sdkversion:{
                 char* msg = getSDKVersion();
                 result = sv_2mortal(newSVpv(msg, strlen(msg)));
             break;
@@ -1077,29 +1083,45 @@ static int dbd_maxdb_sqldbc_bind_parameters (SV* sth, imp_sth_t* imp_sth){
     SV* svVal = m_bindParms->value;
     char* value;
     SQLDBC_Length *indicator = &(m_bindParms->indicator); 
+    SQLDBC_Bool  terminate;
     
     if(svVal == NULL){
       dbd_maxdb_internal_error(sth, DBD_ERR_PARAMETER_NOT_SET_D, index+1);
       DBD_MAXDB_METHOD_RETURN(imp_sth, dbd_maxdb_sqldbc_bind_parameters, SQLDBC_FALSE); 
     }  
     if(SvROK(svVal)){
+//    sv_dump(svVal);
       svVal = SvRV(svVal);
     }  
-    if (! SvOK(svVal)){
+    if (referenceDefaultValue==svVal){
+      *indicator = SQLDBC_DEFAULT_PARAM;
+      value = NULL;
+    } else if (! SvOK(svVal)){
       *indicator = SQLDBC_NULL_DATA;
       value = NULL;
-    } else {
+    }else {
     	  switch (m_bindParms->hostType) {
    	      case SQLDBC_HOSTTYPE_INT1       : {
 			      *indicator = 1;
 			      value = SvPV(svVal, valLen);
-            *value -= 48;
+                  *value -= 48;
 			      valLen = 1;
+			      terminate = SQLDBC_FALSE;
             break;
+   	      
+   	      } case SQLDBC_HOSTTYPE_BINARY  : {
+			      
+			      value = SvPV(svVal, valLen);
+			      *indicator = valLen;
+   	              valLen = SvLEN (svVal);
+			      terminate = SQLDBC_FALSE;
+            break;
+            
           } default : {
 			      *indicator = SQLDBC_NTS;
 			      value = SvPV(svVal, valLen);
 			      valLen = SvLEN (svVal);
+			      terminate = SQLDBC_TRUE;
 			      break;    
           } 
        }
@@ -1110,7 +1132,7 @@ static int dbd_maxdb_sqldbc_bind_parameters (SV* sth, imp_sth_t* imp_sth){
                                                 value,
                                                 indicator,
                                                 valLen,
-                                                SQLDBC_TRUE) != SQLDBC_OK) {
+                                                terminate) != SQLDBC_OK) {
       dbd_maxdb_sqldbc_error(sth, SQLDBC_PreparedStatement_getError(imp_sth->m_prepstmt));
       DBD_MAXDB_METHOD_RETURN(imp_sth, dbd_maxdb_sqldbc_bind_parameters, SQLDBC_FALSE); 
     }       
@@ -1364,7 +1386,7 @@ int dbd_maxdb_st_execute(SV* sth, imp_sth_t* imp_sth) {
       DBD_MAXDB_METHOD_RETURN(imp_sth, dbd_maxdb_st_execute, DBD_MAXDB_ERROR_RETVAL); 
     }
     if (!imp_sth->m_rsmd){
-      imp_sth->m_rsmd = SQLDBC_ResultSet_getResultSetMetaData(imp_sth->m_resultset);
+      imp_sth->m_rsmd = SQLDBC_PreparedStatement_getResultSetMetaData(imp_sth->m_prepstmt);
       if (!imp_sth->m_rsmd) {
         dbd_maxdb_internal_error(sth, DBD_ERR_INITIALIZATION_FAILED_S, "Cannot get resultset metadata");
         DBD_MAXDB_METHOD_RETURN(imp_sth, dbd_maxdb_st_execute, DBD_MAXDB_ERROR_RETVAL); 
@@ -2148,7 +2170,6 @@ int dbd_maxdb_bind_ph (SV *sth, imp_sth_t *imp_sth, SV *param, SV *value,
    STRLEN len;
    int index = SvIV(param);
    dbd_maxdb_bind_param *parameter;
-   ParameterMode pMode;
    
    DBD_MAXDB_METHOD_ENTER(imp_sth, dbd_maxdb_bind_ph); 
 
@@ -2195,8 +2216,8 @@ int dbd_maxdb_bind_ph (SV *sth, imp_sth_t *imp_sth, SV *param, SV *value,
    }
    
    
-   pMode = SQLDBC_ParameterMetaData_getParameterMode  (imp_sth->m_paramMetadata, index);  
-   if (pMode == parameterModeInOut || pMode == parameterModeOut){
+      parameter->paramMode = SQLDBC_ParameterMetaData_getParameterMode  (imp_sth->m_paramMetadata, index);  
+   if (parameter->paramMode == parameterModeInOut || parameter->paramMode == parameterModeOut){
      SV* svVal;
      if(SvROK(parameter->value)){
        svVal = SvRV(parameter->value);

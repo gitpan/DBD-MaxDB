@@ -81,6 +81,7 @@ typedef struct dbd_maxdb_bind_param {
     int sqltype;             /*!< parameter type provide via bind method */
     SQLDBC_HostType hostType;   /*!< column datatyp */
     SQLDBC_Length indicator; /*!< indicator value */
+    ParameterMode paramMode; /*!< indicator value */
 } dbd_maxdb_bind_param;
 
 /*
