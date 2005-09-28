@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         DBD-MaxDB
-version:      7.6.00.16
+version:      7.6.00.17
 version_from: MaxDB.pm
 installdirs:  site
 requires:

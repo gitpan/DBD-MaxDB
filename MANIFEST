@@ -25,6 +25,7 @@ t/060tableinfo2.t
 t/061columninfo.t
 t/063trailingzerobytes.t
 t/064defaultvalues.t
+t/065nestedselect.t
 t/100connectproperties.t
 t/101connect_cached.t
 t/102driverdatasource.t

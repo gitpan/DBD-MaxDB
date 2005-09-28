@@ -29,7 +29,7 @@
 
 require 5.004;
 
-$DBD::MaxDB::VERSION = '7.6.00.16';
+$DBD::MaxDB::VERSION = '7.6.00.17';
 
 {
     package DBD::MaxDB;
@@ -399,7 +399,7 @@ __END__
 =head1 NAME
 
 DBD::MaxDB - MySQL MaxDB database driver for the DBI module
-version 7.6.0    BUILD 016-000-000-000
+version 7.6.0    BUILD 017-003-107-743
 
 =head1 SYNOPSIS
 
@@ -739,7 +739,7 @@ the C<TABLE_CAT> field of a fetched row is always C<NULL>.
 
 =back
 
-=head1 Special Features
+=head1 SPECIAL FEATURES
 
 =head2 Binding of default values as parameter
 
