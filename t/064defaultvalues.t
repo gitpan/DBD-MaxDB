@@ -42,8 +42,6 @@ BEGIN {
       exit;
    }
 }
-
-
 print "1..$tests\n";
 print " Test 1: connect\n";
 my $c = DBI->connect() or die "Can't connect $DBI::err $DBI::errstr\n";
@@ -53,16 +51,16 @@ print " Test 2: drop table\n";
 MaxDBTest::dropTable($c, "defaultvalues");
 MaxDBTest::Test(1);
 
-my $testval = "abc123";
+my $testval = "abc123"
 my $testval_int = 42;
 
 print " Test 3: create table\n";
-$c->do("CREATE TABLE defaultvalues (ID INT NOT NULL DEFAULT ".$testval_int." , DTA VARCHAR(10) NOT NULL DEFAULT '".$testval."')") or die "CREATE TABLE failed $DBI::err $DBI::errstr\n";
+$c->do("CREATE TABLE defaultvalues (ID INT NOT NULL DEFAULT ".$testval_int." , DTA VARCHAR(10) DEFAULT ".$testval.")") or die "CREATE TABLE failed $DBI::err $DBI::errstr\n";
 MaxDBTest::Test(1);
 
 print " Test 4: insert data\n";
 my $s = $c->prepare( 'INSERT INTO defaultvalues ( ID, DTA ) VALUES ( ?, ? )' ) or die "PREPARE INSERT ... failed $DBI::err $DBI::errstr\n";
-$s->execute($DBD::MaxDB::DEFAULT_PARAMETER,$DBD::MaxDB::DEFAULT_PARAMETER) or die "EXECUTE INSERT ... failed $DBI::err $DBI::errstr\n"; 
+$s->execute or die "EXECUTE INSERT ... failed $DBI::err $DBI::errstr\n"; 
 MaxDBTest::Test(1);
 
 print " Test 5: select data\n";
@@ -72,12 +70,10 @@ my $row = $s2->fetchrow_hashref() or die "FETCH ... failed $DBI::err $DBI::errst
 MaxDBTest::Test(1);
 
 print " Test 6: check data\n";
-MaxDBTest::Test( ($testval eq $row->{DTA}));
+MaxDBTest::Test( $testval eq $row->{DTA}));
 
 print " Test 7: check data\n";
-MaxDBTest::Test( ($testval_int == $row->{ID}));
+MaxDBTest::Test($testval_int == $row->{ID});
 
-$s->finish;
-$s2->finish;
 $c->disconnect;
 

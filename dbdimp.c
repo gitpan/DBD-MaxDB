@@ -1374,7 +1374,6 @@ int dbd_maxdb_st_execute(SV* sth, imp_sth_t* imp_sth) {
   }
   
   exec_rc = SQLDBC_PreparedStatement_executeASCII (imp_sth->m_prepstmt); 
-  imp_sth->m_rowNotFound= SQLDBC_FALSE;
   if ( exec_rc != SQLDBC_OK && exec_rc != SQLDBC_NO_DATA_FOUND) {
     dbd_maxdb_sqldbc_error(sth, SQLDBC_PreparedStatement_getError(imp_sth->m_prepstmt)) ;
     DBD_MAXDB_METHOD_RETURN(imp_sth, dbd_maxdb_st_execute, DBD_MAXDB_ERROR_RETVAL); 

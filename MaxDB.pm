@@ -29,7 +29,7 @@
 
 require 5.004;
 
-$DBD::MaxDB::VERSION = '7.6.00.17';
+$DBD::MaxDB::VERSION = '7.6.00.16';
 
 {
     package DBD::MaxDB;
@@ -399,7 +399,7 @@ __END__
 =head1 NAME
 
 DBD::MaxDB - MySQL MaxDB database driver for the DBI module
-version 7.6.0    BUILD 017-003-107-743
+version 7.6.0    BUILD 016-121-109-428
 
 =head1 SYNOPSIS
 
