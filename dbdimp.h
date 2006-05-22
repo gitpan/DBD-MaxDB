@@ -153,6 +153,10 @@ struct imp_sth_st {
 */
 #define DBD_MAXDB_ERROR_RETVAL -42
 
+#define ENCODING_UTF8 1
+#define ENCODING_ASCII_8BIT 0
+#define ENCODING  "ENCODING"
+
 /*prototypes to avoid warnings*/
 int dbd_maxdb_db_login6(SV *dbh, imp_dbh_t *imp_dbh, char *url, char *user, char* password, SV *attr);
 int dbd_maxdb_st_execute(SV* sth, imp_sth_t* imp_sth);
@@ -177,7 +181,7 @@ SV* dbd_maxdb_st_FETCH_attrib(SV* sth, imp_sth_t* imp_sth, SV* keysv);
 int dbd_maxdb_st_STORE_attrib(SV* sth, imp_sth_t* imp_sth, SV* keysv, SV* valuesv);
 
 int dbd_maxdb_db_executeInternal( SV *dbh, SV *sth, char *statement );
-int dbd_maxdb_db_executeUpdate( SV *dbh, char *statement );
+int dbd_maxdb_db_executeUpdate( SV *dbh, SV *statement );
 SV* dbd_maxdb_st_cancel( SV *sth);
 SV* dbd_maxdb_db_getSQLMode(SV* dbh);
 /* end */

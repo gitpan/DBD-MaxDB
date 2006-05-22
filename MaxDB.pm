@@ -29,7 +29,7 @@
 
 require 5.004;
 
-$DBD::MaxDB::VERSION = '7.6.00.16';
+$DBD::MaxDB::VERSION = '7.6.00.27';
 
 {
     package DBD::MaxDB;
@@ -37,6 +37,7 @@ $DBD::MaxDB::VERSION = '7.6.00.16';
     use DBI ();
     use DynaLoader ();
     use Exporter ();
+    use Encode;
 
     @ISA = qw(Exporter DynaLoader);
 
@@ -53,6 +54,10 @@ $DBD::MaxDB::VERSION = '7.6.00.16';
     
     my $tmp = "constant default paramater, can be used for prepared statements";
     $DEFAULT_PARAMETER =  \*{"DBD::MaxDB::". $tmp};
+
+    *ENCODING_UTF8 = \1;
+    *ENCODING_ASCII_8BIT = \0;
+    *ENCODING = \"ENCODING";
 
     sub driver{
         return $drh if $drh;
@@ -106,21 +111,31 @@ $DBD::MaxDB::VERSION = '7.6.00.16';
               $attr->{"HOST"}="";
             }
       } else {
-            $attr->{"HOST"}="";
-          }
-          if (defined $3){
-            $attr->{"DBNAME"}=$3;
-          } else {
-            $attr->{"DBNAME"}="";
-          }
-          if (defined $4){
-            foreach (split(/&/,$4)){
-              $_=~/(.*)=(.*)/;
-              $attr->{uc ($1)}=$2;
-            }
-          }
-        # create a 'blank' dbh
-        my $this = DBI::_new_dbh($drh, {
+         $attr->{"HOST"}="";
+      }
+      if (defined $3){
+        $attr->{"DBNAME"}=$3;
+      } else {
+        $attr->{"DBNAME"}="";
+      }
+      if (defined $4){
+        foreach (split(/&/,$4)){
+          $_=~/(.*)=(.*)/;
+          $attr->{uc ($1)}=$2;
+        }
+      }
+
+			if (utf8::is_utf8($user)){
+			  $attr->{$DBD::MaxDB::ENCODING}=$DBD::MaxDB::ENCODING_UTF8;
+			  if (!utf8::is_utf8($auth)){
+			  	$auth = Encode::encode("utf8", $auth);
+			  } 
+			} elsif ( utf8::is_utf8($auth)){
+				$attr->{$DBD::MaxDB::ENCODING}=$DBD::MaxDB::ENCODING_UTF8;
+			 	$user = Encode::encode("utf8", $user);
+			}
+      
+      my $this = DBI::_new_dbh($drh, {
             'Name' => $url,
             'USER' => $user,
             'CURRENT_USER' => $user,
@@ -140,14 +155,19 @@ $DBD::MaxDB::VERSION = '7.6.00.16';
     use strict;
 
     sub prepare {
-        my($dbh, $statement, @attribs)= @_;
+        my($dbh, $statement, $attribs)= @_;
+        $attribs = undef unless(defined $attribs && ref $attribs eq "HASH");
+        
+        if (utf8::is_utf8($statement)){
+				  $attribs->{$DBD::MaxDB::ENCODING}=$DBD::MaxDB::ENCODING_UTF8;
+				}
 
         # create a 'blank' dbh
         my $sth = DBI::_new_sth($dbh, {
             'Statement' => $statement,
             });
 
-        DBD::MaxDB::st::_prepare($sth, $statement, @attribs)
+        DBD::MaxDB::st::_prepare($sth, $statement, $attribs)
             or return undef;
 
         $sth;
@@ -399,7 +419,7 @@ __END__
 =head1 NAME
 
 DBD::MaxDB - MySQL MaxDB database driver for the DBI module
-version 7.6.0    BUILD 016-121-109-428
+version 7.6.0    BUILD 027-121-124-939
 
 =head1 SYNOPSIS
 
@@ -502,10 +522,6 @@ You can define the following options:
                       0: no statements are cached,
                       UNLIMITED: unlimited number of
                       statements are cached.
-
-  unicode             The user name, password and SQL
-                      statements are sent to the database
-                      in UNICODE.
 
 =item B<Examples>
 
@@ -756,6 +772,46 @@ to set the default value as parameter of a prepared statement.
            or die "Can't execute statement $DBI::err $DBI::errstr\n";
   ...
 
+=head1 UNICODE
+
+DBD::MaxDB supports Unicode. Perl's internal unicode format is UTF-8
+but MaxDB uses UCS-2. Therefor the support is limited to UTF-8 characters 
+that also contained in the UCS-2 standard.
+
+=head2 Perl and Unicode
+
+Perl began implementing Unicode with version 5.6. But if you plan to use Unicode
+it is strongly recomended to use perl 5.8.2 or later. Details about using
+unicode in perl can you find in the perl documentation:
+
+   perldoc perluniintro
+   perldoc perlunicode
+
+=head2 MaxDB and Unicode
+
+MaxDB supports the code attribute Unicode for the data type CHAR and is able to
+display various presentation codes in Unicode format. As well as storing data in Unicode, 
+you can also store the names of database objects (for example, table or column names) in 
+Unicode and display these with the database tools in the desired presentation code.
+
+= head2 Installing a Unicode-Enabled Database
+
+You can govern whether or not a database instance should be Unicode-enabled when you create it.
+To do this, set the parameter _UNICODE to YES. Please note that you cannot change 
+the _UNICODE parameter once you have set it. You can also set the system’s default value. 
+If you set the DEFAULT_CODE parameter to Unicode, any columns of type CHAR, VARCHAR, and 
+LONG for which no other code attribute has been defined, become Unicode columns.
+
+  Column definition   Result
+  -------------------------------------------------------
+  CHAR (n) UNICODE    UNICODE column
+  CHAR (n)            UNICODE column
+  CHAR (n) ASCII      ASCII column
+  CHAR (n) BINARY     Binary column
+
+Please note that MaxDB Unicode data is stored internally in UCS-2 format. This,
+however, doubles the amount of memory space needed for storing Unicode data to the
+database instance.
 
 =head1 INSTALLATION
 
@@ -784,7 +840,7 @@ DBI and its modules in general.
 
 =head1 COPYRIGHT
 
-Copyright 2000-2005 by SAP AG
+Copyright 2000-2006 by SAP AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of either the Artistic License, as

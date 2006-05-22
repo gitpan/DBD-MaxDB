@@ -32,6 +32,27 @@ require 5.004;
     package MaxDBTest;
  
     $numTest = 0;
+    
+    sub checkMinimalKernelVersion($;$){
+        my ($dbh, $reqVers) = @_;
+        my $kernvers = $dbh->{"MAXDB_KERNELVERSION"};
+        
+        $reqVers =~ /^(\d+).(\d+)(.(\d+))?/; 
+        
+        my $reqmajor = $1;
+        my $reqminor = $2;
+        my $reqcl    = (defined $4)? $4 : 0;
+        
+        $reqVers = $reqmajor * 10000 + $reqminor *100 + $reqcl;
+
+#        print "$kernvers >= $reqVers ($reqmajor, $reqminor, $reqcl)\n";
+        
+        if (   $kernvers >=  $reqVers) {
+          return 1;
+        }
+    	  return 0;
+    }
+
     sub Test($;$) {
         my $result = shift; my $str = shift || '';
         if (defined $result && $result eq "skipped" ){    
@@ -43,6 +64,16 @@ require 5.004;
     }
     
     # Test and beginTest / endTest are not compatible [problem: incrementation of $numTest]
+    # Test and beginTest / endTest are not compatible [problem: incrementation of $numTest]
+    sub TestEnd($;$) {
+        my $result = shift; my $str = shift || '';
+        if (defined $result && $result eq "skipped" ){    
+         printf("ok %d # SKIPPED %s\n", $numTest, $str);
+        } else {
+          printf("%sok %d%s\n", ($result ? "" : "not "), $numTest, $str);
+        }  
+        $result;
+    }
 
 
     # @param [in] name of sub test case

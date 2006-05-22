@@ -712,7 +712,7 @@ enum_db (const HKEY their, const char *section, char **pkey, int idx) {
 	int prefix_len;
 	int i;
 	int j;
-	char buff[64 * 1024];
+	char buff[1024];
 
 	prefix_len = strlen (key_prefix);
 	if (RegOpenKeyEx (their, section, 0, KEY_ENUMERATE_SUB_KEYS, &our) != ERROR_SUCCESS)
@@ -1213,9 +1213,7 @@ SV *        dbh
 SV *        stmt
 CODE:
 {
-   STRLEN lna;
-   char *pstmt = SvOK(stmt) ? SvPV(stmt,lna) : "";
-   ST(0) = sv_2mortal(newSViv((IV)dbd_maxdb_db_executeUpdate(dbh, pstmt)));
+   ST(0) = sv_2mortal(newSViv((IV)dbd_maxdb_db_executeUpdate(dbh, stmt)));
 }
   
 MODULE = DBD::MaxDB    PACKAGE = DBD::MaxDB::st

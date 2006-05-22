@@ -235,7 +235,7 @@ sub checkSQLDBCSDKVersion {
     while (<FILE_IN>) {
       chomp $_;
       if (/^#define SQLDBC_CHeaderVersion \"SQLDBC_C.H\s*((\d+).(\d+).(\d+)\s*BUILD\s*(\d+).*)\"$/) {
-			   if ( $2<7 || ($2>=7 && $3<5) || ($2==7 && $3==5 && $4==0 && $5<12)){ 
+			   if ( $2<7 || ($2>=7 && $3<6) || ($2==7 && $3==6 && $4==0 && $5<=19)){ 
 			    $version = $1;
           last;
 			  }
@@ -252,7 +252,7 @@ sub checkSQLDBCSDKVersion {
       }else {
         print "Cannot find the version of SQLDBC sdk.\n"; 
       }
-	    print "The version of SQLDBC-SDK must be at least 7.5.0 Build 012 but\n\n";
+	    print "The version of SQLDBC-SDK must be at least 7.6.0 Build 019 but\n";
 	    print "you should always try the newest version available.\n\n";
 	    print "The DBD::MaxDB module needs to link with MaxDB's common database \n";
 	    print "interface SQLDBC. The DBD::MaxDB module does _not_ include the\n";
