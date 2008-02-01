@@ -1208,6 +1208,12 @@ _getSQLMode(dbh)
   ST(0) = dbd_maxdb_db_getSQLMode(dbh);
 
 void
+_getVersion(dbh)
+    SV *  dbh
+    CODE:
+  ST(0) = dbd_maxdb_db_getVersion(dbh);
+
+void
 _executeUpdate( dbh, stmt )
 SV *        dbh
 SV *        stmt

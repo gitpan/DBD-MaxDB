@@ -6,30 +6,21 @@
 #
 #\if EMIT_LICENCE
 #
-#    ========== licence begin  GPL
-#    Copyright (c) 2001-2005 SAP AG
+#    ========== licence begin  SAP
 #
-#    This program is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU General Public License
-#    as published by the Free Software Foundation; either version 2
-#    of the License, or (at your option) any later version.
+#    (c) Copyright 2001-2006 SAP AG
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#    All rights reserved.
 #
-#    You should have received a copy of the GNU General Public License
-#    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #    ========== licence end
+
 
 #\endif
 #*/
 
 require 5.004;
 
-$DBD::MaxDB::VERSION = '7.6.00.27';
+$DBD::MaxDB::VERSION = '7.7.05.00';
 
 {
     package DBD::MaxDB;
@@ -285,23 +276,31 @@ EOF
 
     sub primary_key_info {
        my ($dbh, $catalog, $schema, $table ) = @_;
+       #$TABLE_CAT,$TABLE_SCHEM,$TABLE_NAME,$KEY_SEQ,$PK_NAME
+       
+        if ($#_ == 1) {
+           my $attrs = $_[1];
+           $catalog = $attrs->{TABLE_CAT};
+           $schema = $attrs->{TABLE_SCHEM};
+           $table = $attrs->{TABLE_NAME};
+        }
 
-       # create a "blank" statement handle
-       my $sth = DBI::_new_sth($dbh, { 'Statement' => "SQLPrimaryKeys" });
+        my $stmt = "SELECT NULL TABLE_CAT, owner TABLE_SCHEM , tablename TABLE_NAME, columnname COLUMN_NAME, ";
+        $stmt .= "keypos KEY_SEQ, null PK_NAME FROM domain.columns WHERE TABLETYPE <> 'RESULT' ";
+        $stmt .= "AND owner LIKE '$schema' " if ($schema);
+        $stmt .= "AND tablename LIKE '$table' " if ($table);
+        $stmt .= "AND keypos is not null ORDER BY owner, tablename, pos ";
 
-       $catalog = "" if (!$catalog);
-       $schema = "" if (!$schema);
-       $table = "" if (!$table);
-       DBD::MaxDB::st::_primary_keys($dbh,$sth, $catalog, $schema, $table )
-             or return undef;
-       $sth;
+        my $sth = DBI::_new_sth($dbh, { 'Statement' => $stmt });
+        $sth->{'LongTruncOk'} = 1;
+
+        my $res = DBD::MaxDB::st::_executeInternal($dbh, $sth, $stmt);
+        return undef if (!$res && $res != '0E0');
+        $sth;
     }
 
     sub foreign_key_info {
        my ($dbh, $pkcatalog, $pkschema, $pktable, $fkcatalog, $fkschema, $fktable ) = @_;
-
-       # create a "blank" statement handle
-       my $sth = DBI::_new_sth($dbh, { 'Statement' => "SQLForeignKeys" });
 
        $pkcatalog = "" if (!$pkcatalog);
        $pkschema = "" if (!$pkschema);
@@ -309,8 +308,40 @@ EOF
        $fkcatalog = "" if (!$fkcatalog);
        $fkschema = "" if (!$fkschema);
        $fktable = "" if (!$fktable);
-       _GetForeignKeys($dbh, $sth, $pkcatalog, $pkschema, $pktable, $fkcatalog, $fkschema, $fktable) or return undef;
-       $sth;
+              
+        my $stmt = "SELECT ";       
+        $stmt .= "NULL PKTABLE_CAT, ";
+        $stmt .= "PKTABLE_OWNER PKTABLE_SCHEM, ";
+        $stmt .= "PKTABLE_NAME PKTABLE_NAME, ";
+        $stmt .= "PKCOLUMN_NAME PKCOLUMN_NAME, ";
+        $stmt .= "NULL FKTABLE_CAT, ";
+        $stmt .= "FKTABLE_OWNER FKTABLE_SCHEM, ";
+        $stmt .= "FKTABLE_NAME FKTABLE_NAME, ";
+        $stmt .= "FKCOLUMN_NAME FKCOLUMN_NAME, ";
+        $stmt .= "KEY_SEQ KEY_SEQ, ";
+        $stmt .= "1 UPDATE_RULE, ";
+        $stmt .= "DELETE_RULE, ";
+        $stmt .= "FK_NAME, ";
+        $stmt .= "PK_NAME, ";
+        $stmt .= "7 DEFERRABILITY, ";
+        $stmt .= "NULL UNIQUE_OR_PRIMARY ";
+        if (_getVersion($dbh) < 70600){ 
+        	$stmt .= "FROM sysodbcforeignkeys WHERE 1 = 1 ";
+        } else {
+        	$stmt .= "FROM SYSODBC.FOREIGNKEYS WHERE 1 = 1 ";
+        }
+        $stmt .= "AND PKTABLE_OWNER LIKE '$pkschema' " if ($pkschema);
+        $stmt .= "AND PKTABLE_NAME  LIKE '$pktable'  " if ($pktable);
+        $stmt .= "AND FKTABLE_OWNER LIKE '$fkschema' " if ($fkschema);
+        $stmt .= "AND FKTABLE_NAME  LIKE '$fktable'  " if ($fktable);
+        $stmt .= "ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ";
+
+        my $sth = DBI::_new_sth($dbh, { 'Statement' => $stmt });
+        $sth->{'LongTruncOk'} = 1;
+
+        my $res = DBD::MaxDB::st::_executeInternal($dbh, $sth, $stmt);
+        return undef if (!$res && $res != '0E0');
+        $sth;
     }
 
     sub ping {
@@ -418,8 +449,8 @@ __END__
 
 =head1 NAME
 
-DBD::MaxDB - MySQL MaxDB database driver for the DBI module
-version 7.6.0    BUILD 027-121-124-939
+DBD::MaxDB - MaxDB database driver for the DBI module
+version 7.7.5    BUILD 000-000-000-000
 
 =head1 SYNOPSIS
 
@@ -438,15 +469,15 @@ See the L<DBI> module documentation for full details.
 =head1 DESCRIPTION
 
 DBD::MaxDB is a Perl module which provides access to the
-MySQL MaxDB databases using the DBI module. It is an
+MaxDB databases using the DBI module. It is an
 interface between the Perl programming language and the MaxDB
-programming API SQLDBC that comes with the MySQL MaxDB relational
+programming API SQLDBC that comes with the MaxDB relational
 database management system.
 
 The DBD::MaxDB module needs to link with MaxDB's common database interface
 SQLDBC which is not included in this distribution. You can download it from the
-MySQL homepage at:
-L<http://www.mysql.com/maxdb>
+MaxDB homepage at:
+L<https://www.sdn.sap.com/irj/sdn/maxdb>
 
 =head1 MODULE DOCUMENTATION
 
@@ -561,7 +592,7 @@ computer will be listed.
 In case of an error the driver returns an error code, an error text and if
 appropriate an error state. Details concerning the meaning of an error can
 be found in the database messages reference at
-L<http://www.mysql.com/products/maxdb/docs.html>
+L<http://maxdb.sap.com/documentation/>
 
 C<< $errcode = $h->err; >>
 Returns the error code.
@@ -819,28 +850,16 @@ Please see the README file which comes with the module distribution.
 
 =head1 MAILING LIST SUPPORT
 
-This module is maintained and supported on a mailing list,
+This module is maintained and supported on a web forum,
 
-C<maxdb@lists.mysql.com>
-
-To subscribe to this list, send a mail to
-
-C<maxdb-subscribe@lists.mysql.com>
-
-or
-
-C<maxdb-digest-subscribe@lists.mysql.com>
-
-Mailing list archives are available at
-
-L<http://lists.mysql.com/maxdb>
+L<https://forums.sdn.sap.com/forum.jspa?forumID=90&start=0>
 
 Additionally you might try the dbi-user mailing list for questions about
 DBI and its modules in general.
 
 =head1 COPYRIGHT
 
-Copyright 2000-2006 by SAP AG
+Copyright 2000-2007 by SAP AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of either the Artistic License, as
@@ -871,9 +890,9 @@ Information on the DBI interface itself can be gained by typing:
 
 C<perldoc DBI>
 
-Information on the MySQL MaxDB database can be found on the WWW at
+Information on the MaxDB database can be found on the WWW at
 
-L<http://www.mysql.com/maxdb>
+L<https://www.sdn.sap.com/irj/sdn/maxdb>
 
 =cut
 
